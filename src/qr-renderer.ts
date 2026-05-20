@@ -69,7 +69,7 @@ export class QrRenderer {
     const quietZone = options.border;
     const viewSize = (size + quietZone * 2) * moduleSize;
     
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewSize} ${viewSize}" width="100%" height="100%">`;
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" viewBox="0 0 ${viewSize} ${viewSize}" width="100%" height="100%">`;
     
     // Background
     if (!options.transparentBg) {
