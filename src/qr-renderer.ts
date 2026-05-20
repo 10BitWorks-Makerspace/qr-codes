@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { qrcodegen } from './qrcodegen';
 
 export interface QrOptions {
@@ -21,7 +22,8 @@ export interface QrResult {
 }
 
 export class QrRenderer {
-  private defsStr: string = '';
+  private finderInner: string = '';
+  private unitInner: string = '';
 
   async initialize() {
     try {
@@ -42,14 +44,8 @@ export class QrRenderer {
         return inner;
       };
 
-      this.defsStr = `
-        <g id="finder-def">
-          ${extractSvgInner(finderText)}
-        </g>
-        <g id="unit-def">
-          ${extractSvgInner(unitText)}
-        </g>
-      `;
+      this.finderInner = extractSvgInner(finderText);
+      this.unitInner = extractSvgInner(unitText);
     } catch (err) {
       console.error('Failed to load SVG templates', err);
     }
@@ -74,7 +70,6 @@ export class QrRenderer {
     const viewSize = (size + quietZone * 2) * moduleSize;
     
     let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewSize} ${viewSize}" width="100%" height="100%">`;
-    svg += `<defs>${this.defsStr}</defs>`;
     
     // Background
     if (!options.transparentBg) {
@@ -85,14 +80,15 @@ export class QrRenderer {
     svg += `<g transform="translate(${quietZone * moduleSize}, ${quietZone * moduleSize})" color="${options.fgColor}" fill="${options.fgColor}">`;
 
     // Draw the 3 finder patterns
-    // Top-Left
-    svg += `<use href="#finder-def" x="-20" y="-20" />`;
+    // Top-Left (Render original geometry for editability)
+    svg += `<g transform="translate(-20, -20)"><g id="finder-def">${this.finderInner}</g></g>`;
     // Top-Right
     svg += `<use href="#finder-def" x="${(size - 7) * moduleSize - 20}" y="-20" />`;
     // Bottom-Left
     svg += `<use href="#finder-def" x="-20" y="${(size - 7) * moduleSize - 20}" />`;
 
     // Draw the data modules
+    let unitDefRendered = false;
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         // Skip finder pattern zones
@@ -105,7 +101,12 @@ export class QrRenderer {
         }
 
         if (qr.getModule(x, y)) {
-          svg += `<use href="#unit-def" x="${x * moduleSize}" y="${y * moduleSize}" />`;
+          if (!unitDefRendered) {
+            svg += `<g transform="translate(${x * moduleSize}, ${y * moduleSize})"><g id="unit-def">${this.unitInner}</g></g>`;
+            unitDefRendered = true;
+          } else {
+            svg += `<use href="#unit-def" x="${x * moduleSize}" y="${y * moduleSize}" />`;
+          }
         }
       }
     }
