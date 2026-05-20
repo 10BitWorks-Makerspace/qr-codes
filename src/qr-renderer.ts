@@ -26,8 +26,8 @@ export class QrRenderer {
   async initialize() {
     try {
       const [finderRes, unitRes] = await Promise.all([
-        fetch('/finder.svg'),
-        fetch('/unit-block-template.svg')
+        fetch(`${import.meta.env.BASE_URL}finder.svg`),
+        fetch(`${import.meta.env.BASE_URL}unit-block-template.svg`)
       ]);
       const finderText = await finderRes.text();
       const unitText = await unitRes.text();
